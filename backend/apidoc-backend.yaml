@@ -1,0 +1,1022 @@
+openapi: 3.0.1
+info:
+  title: Back-End Estágio
+  contact:
+    name: Lucas Soares Gomes
+    url: http://github.com/lucassgomes
+    email: lucasoaresgomes@gmail.com
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:3000'
+    description: Development
+components:
+  schemas:
+    Parada:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nome:
+          type: string
+        latitude:
+          type: number
+          format: float
+        longitude:
+          type: number
+          format: float
+    Linha:
+      type: object
+      properties:
+        id: 
+          type: integer
+          format: int64
+        nome:
+          type: string
+    Veiculo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nome:
+          type: string
+        modelo:
+          type: string
+        linha_id:
+          type: integer
+          format: int64
+    Posicao:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: float
+        longitude:
+          type: number
+          format: float
+        veiculo_id:
+          type: integer
+          format: int64
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+paths:
+  /paradas:
+    post:
+      tags:
+        - Paradas
+      summary: Cadastra um ponto de parada
+      requestBody:
+        content:
+          application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Parada'
+                required:
+                  - id
+                  - nome
+                  - latitude
+                  - longitude
+              example:
+                id: 1
+                nome: "Rua A"
+                latitude: 19.123
+                longitude: 41.456
+      responses:
+        '201':
+          description: Cadastro realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Parada adicionada com sucesso!"
+        '400':
+          description: O valor de id informado no corpo da requição já exite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Parada com mesmo id já foi cadastrada no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+              
+    get:
+        tags:
+          - Paradas
+        summary: Busca todos os pontos de parada
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    schema:
+                    $ref: '#/components/schemas/Parada'
+                example:
+                  [
+                    {
+                      id: 1,
+                      nome: "Rua A",
+                      latitude: 19.123,
+                      longitude: 41.456
+                    }
+                  ]
+  /paradas/{id}:
+    get:
+        tags:
+          - Paradas
+        summary: Busca um ponto de parada específico
+        parameters:
+          - name: id
+            in: path
+            description: ID do ponto de parada
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Parada'
+                example:
+                  id: 1
+                  nome: "Rua A"
+                  latitude: 19.123
+                  longitude: 41.456
+          '400':
+            description: Valor informado para o campo id não foi encontrado
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Message'
+                example:
+                  message: "Parada não encontrada!"
+    put:
+      tags:
+        - Paradas
+      summary: Atualiza um ponto de parada
+      parameters:
+        - name: id
+          in: path
+          description: ID do ponto de parada
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Parada'
+            example:
+              id: 100
+      responses:
+        '200':
+           description: Operação feita com sucesso
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Message'
+               example:
+                 message: "Parada atualizada com sucesso!"
+        '400':
+          description: Valor informado para o campo id não foi encontrado ou já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                NotFound:
+                  value:
+                    message: "Parada não encontrada!"
+                Exists:
+                  value:
+                    message: "Parada com mesmo id já foi cadastrada no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+    delete:
+      tags:
+        - Paradas
+      summary: Remove um ponto de parada
+      parameters:
+        - name: id
+          in: path
+          description: ID do ponto de parada
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Operação feita com sucesso
+        '400':
+          description: Valor informado para o parâmetro id não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Parada não encontrada!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+  /linhas:
+    post:
+      tags:
+        - Linhas
+      summary: Cadastra uma linha
+      requestBody:
+        content:
+          application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Linha'
+                properties:
+                  paradas:
+                    type: array
+                    items:
+                      type: integer
+                      format: int64
+                required:
+                  - id
+                  - nome
+              example:
+                id: 1
+                nome: "Santo Antônio"
+                paradas: [
+                  1
+                ]
+      responses:
+        '201':
+          description: Cadastro realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Linha adicionada com sucesso!"
+        '400':
+          description: O valor de id informado no corpo da requição já exite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Linha com mesmo id já foi cadastrada no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+              
+    get:
+        tags:
+          - Linhas
+        summary: Busca todos as linhas
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    schema:
+                      allOf:
+                        - $ref: '#/components/schemas/Linha'
+                      properties:
+                        paradas:
+                          type: array
+                          items:
+                            schema:
+                            $ref: '#/components/schemas/Parada'
+                example:
+                          [
+                            {
+                              id: 1,
+                              nome: "Santo Antônio",
+                              paradas: [
+                                {
+                                  id: 1,
+                                  nome: "Rua A",
+                                  latitude: 19.123,
+                                  longitude: 41.456
+                                }
+                              ]
+                            }
+                          ]
+  /linhas/{id}:
+    get:
+        tags:
+          - Linhas
+        summary: Busca uma linha específica
+        parameters:
+          - name: id
+            in: path
+            description: ID da linha
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Linha'
+                example:
+                  {
+                    id: 1,
+                    nome: "Santo Antônio",
+                    paradas: [
+                      {
+                        id: 1,
+                        nome: "Rua A",
+                        latitude: 19.123,
+                        longitude: 41.456
+                      }
+                    ]
+                  }
+          '400':
+            description: Valor informado para o campo id não foi encontrado
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Message'
+                example:
+                  message: "Linha não encontrada!"
+    put:
+      tags:
+        - Linhas
+      summary: Atualiza uma linha
+      parameters:
+        - name: id
+          in: path
+          description: ID da linha
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Linha'
+            example:
+              id: 100
+      responses:
+        '200':
+           description: Operação feita com sucesso
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Message'
+               example:
+                 message: "Linha atualizada com sucesso!"
+        '400':
+          description: Valor informado para o campo id da parada ou da linha não foi encontrado ou já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                NotFound:
+                  value:
+                    message: "Linha não encontrada!"
+                NotFoundParada:
+                  value:
+                    message: "Parada com id 123 não foi encontrada no sistema!"
+                Exists:
+                  value:
+                    message: "Linha com mesmo id já foi cadastrada no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+    delete:
+      tags:
+        - Linhas
+      summary: Remove uma linha
+      parameters:
+        - name: id
+          in: path
+          description: ID da linha
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Operação feita com sucesso
+        '400':
+          description: Valor informado para o parâmetro id não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Linha não encontrada!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+  /veiculos:
+    post:
+      tags:
+        - Veiculos
+      summary: Cadastra um veiculo
+      requestBody:
+        content:
+          application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Veiculo'
+                required:
+                  - id
+                  - nome
+                  - modelo
+              examples:
+                VeiculoEmAcaoNaLinha:
+                  value:
+                    id: 1
+                    nome: "Turi"
+                    modelo: "Mercedes"
+                    linha_id: 1
+                VeiculoTreinamento:
+                  value:
+                    id: 2
+                    nome: "Turi 2"
+                    modelo: "Volkwagem"
+      responses:
+        '201':
+          description: Cadastro realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Veículo adicionado com sucesso!"
+        '400':
+          description: O valor de id informado no corpo da requição já exite ou a linha informada não foi encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                NotFound:
+                  value:
+                    message: "Linha não encontrada!"
+                Exists:
+                  value:
+                    message: "Veículo com mesmo id já foi cadastrada no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+    get:
+        tags:
+          - Veiculos
+        summary: Busca todos os veículos
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    schema:
+                    $ref: '#/components/schemas/Veiculo'
+                example:
+                  [
+                    {
+                      id: 1,
+                      nome: "Turi",
+                      modelo: "Mercedes",
+                      linha_id: 1
+                    },
+                    {
+                      id: 2,
+                      nome: "Turi 2",
+                      modelo: "Volkwagem"
+                    }
+                  ]
+  /veiculos/{id}:
+    get:
+        tags:
+          - Veiculos
+        summary: Busca uma linha específica
+        parameters:
+          - name: id
+            in: path
+            description: ID do veículo
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Veiculo'
+                example:
+                  {
+                    id: 1,
+                    nome: "Turi",
+                    modelo: "Mercedes"
+                  }
+          '400':
+            description: Valor informado para o campo id não foi encontrado
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Message'
+                example:
+                  message: "Veículo não encontrado!"
+    put:
+      tags:
+        - Veiculos
+      summary: Atualiza um veículo
+      parameters:
+        - name: id
+          in: path
+          description: ID do veículo
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veiculo'
+            example:
+              id: 100
+      responses:
+        '200':
+           description: Operação feita com sucesso
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Message'
+               example:
+                 message: "Veículo atualizado com sucesso!"
+        '400':
+          description: Valor informado para o campo id do veículo ou da linha não foi encontrado ou já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                NotFound:
+                  value:
+                    message: "Veículo não encontrado!"
+                NotFoundLinha:
+                  value:
+                    message: "Linha não encontrada!"
+                Exists:
+                  value:
+                    message: "Veículo com mesmo id já foi cadastrado no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+    delete:
+      tags:
+        - Veiculos
+      summary: Remove um veículo
+      parameters:
+        - name: id
+          in: path
+          description: ID do veículo
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Operação feita com sucesso
+        '400':
+          description: Valor informado para o parâmetro id não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Veículo não encontrada!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+  /posicoes:
+    post:
+      tags:
+        - Posicoes
+      summary: Cadastra uma posição de um veículo
+      requestBody:
+        content:
+          application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Posicao'
+                required:
+                  - latitude
+                  - longitude
+                  - veiculo_id
+              examples:
+                VeiculoEmAcaoNaLinha:
+                  value:
+                    latitude: 19.122
+                    longitude: 41.456
+                    veiculo_id: 1
+                VeiculoTreinamento:
+                  value:
+                    latitude: 19.456
+                    longitude: 41.123
+                    veiculo_id: 2
+      responses:
+        '201':
+          description: Cadastro realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Posição adicionada com sucesso!"
+        '400':
+          description: O valor de id informado no corpo da requição já exite ou o veículo não foi encotrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                NotFound:
+                  value:
+                    message: "Veículo não encontrado!"
+                Exists:
+                  value:
+                    message: "Posição com mesmo id já foi cadastrada no sistema!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+    get:
+        tags:
+          - Posicoes
+        summary: Busca todas as posições dos veículos
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    schema:
+                    $ref: '#/components/schemas/Posicao'
+                example:
+                  [
+                    {
+                      latitude: 19.122,
+                      longitude: 41.456,
+                      veiculo_id: 1
+                    },
+                    {
+                      latitude: 19.456,
+                      longitude: 41.123,
+                      veiculo_id: 2
+                    }
+                  ]
+  /posicoes/{id}:
+    get:
+        tags:
+          - Posicoes
+        summary: Busca uma posição específica
+        parameters:
+          - name: id
+            in: path
+            description: ID da posição
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Operação feita com sucesso
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Posicao'
+                example:
+                  {
+                    latitude: 19.122,
+                    longitude: 41.456,
+                    veiculo_id: 1
+                  }
+          '400':
+            description: Valor informado para o campo id não foi encontrado
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Message'
+                example:
+                  message: "Posição não encontrada!"
+    put:
+      tags:
+        - Posicoes
+      summary: Atualiza uma posição de um veículo
+      parameters:
+        - name: id
+          in: path
+          description: ID da posição
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Posicao'
+            example:
+              latitude: 19.123
+      responses:
+        '200':
+           description: Operação feita com sucesso
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Message'
+               example:
+                 message: "Posição atualizada com sucesso!"
+        '400':
+          description: Valor informado para o campo id da posição ou do veículo não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                NotFound:
+                  value:
+                    message: "Posição não encontrada!"
+                NotFoundVeiculo:
+                  value:
+                    message: "Veículo não encontrado!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+    delete:
+      tags:
+        - Posicoes
+      summary: Remove uma posição de um veículo
+      parameters:
+        - name: id
+          in: path
+          description: ID da posição
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Operação feita com sucesso
+        '400':
+          description: Valor informado para o parâmetro id não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Posição não encontrada!"
+        '500':
+          description: Não foi possível completar a ação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Message'
+                properties:
+                  error:
+                    type: object
+  /paradas-posicao:
+    get:
+      tags:
+        - Paradas
+      summary: Busca as paradas mais proximas a posição
+      parameters:
+        - name: latitude
+          in: query
+          description: Latitude da posição
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: longitude
+          in: query
+          description: Longitude da posição
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: Operação feita com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  schema:
+                  $ref: '#/components/schemas/Parada'
+              example:
+                    [
+                      {
+                        id: 1,
+                        nome: "Rua A",
+                        latitude: 19.123,
+                        longitude: 41.456
+                      }
+                    ]
+  /paradas/{id}/linhas:
+    get:
+      tags:
+        - Paradas
+      summary: Busca as linhas associadas a parada
+      parameters:
+        - name: id
+          in: path
+          description: ID da parada
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Operação feita com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Parada'
+                properties:
+                  linhas:
+                    type: array
+                    items:
+                      schema:
+                      $ref: '#/components/schemas/Linha'
+              example:
+                  {
+                    id: 1,
+                    nome: "Rua A",
+                    latitude: 19.123,
+                    longitude: 41.456,
+                    linhas: [
+                      {
+                        id: 1,
+                        nome: "Santo Antônio"
+                      }
+                    ]
+                  }
+        '400':
+          description: Valor informado para o campo id não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Parada não encontrada!"
+  /linhas/{id}/veiculos:
+    get:
+      tags:
+        - Linhas
+      summary: Busca os veículos associadas a linha
+      parameters:
+        - name: id
+          in: path
+          description: ID da linha
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Operação feita com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Linha'
+                properties:
+                  veiculos:
+                    type: array
+                    items:
+                      schema:
+                      $ref: '#/components/schemas/Veiculo'
+              example:
+                  {
+                    id: 1,
+                    nome: "Santo Antônio",
+                    veiculos: [
+                      {
+                        id: 1,
+                        nome: "Turi",
+                        modelo: "Mercedes",
+                        linha_id: 1
+                      }
+                    ]
+                  }
+        '400':
+          description: Valor informado para o campo id não foi encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: "Linha não encontrada!"
